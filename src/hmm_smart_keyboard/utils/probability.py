@@ -1,6 +1,7 @@
 """Probability calculation utilities for HMM."""
 
 import numpy as np
+import numpy.typing as npt
 
 
 def log_probability(prob: float) -> float:
@@ -19,8 +20,8 @@ def log_probability(prob: float) -> float:
 
 
 def normalize_probabilities(
-    probs: np.ndarray | list[float],
-) -> np.ndarray:
+    probs: npt.NDArray[np.float64] | list[float],
+) -> npt.NDArray[np.float64]:
     """
     Normalize a probability distribution to sum to 1.
 
@@ -66,7 +67,9 @@ def add_log_probabilities(
     return max_log + np.log(np.exp(log_prob1 - max_log) + np.exp(log_prob2 - max_log))
 
 
-def exp_normalize(log_probs: np.ndarray) -> np.ndarray:
+def exp_normalize(
+    log_probs: npt.NDArray[np.float64],
+) -> npt.NDArray[np.float64]:
     """
     Convert log probabilities to normalized probabilities.
 

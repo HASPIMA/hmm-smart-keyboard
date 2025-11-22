@@ -1,11 +1,11 @@
 """Validation utilities for HMM parameters."""
 
 import numpy as np
-from typing import Union
+import numpy.typing as npt
 
 
 def validate_matrix(
-    matrix: np.ndarray,
+    matrix: npt.NDArray[np.float64],
     name: str = 'Matrix',
 ) -> None:
     """
@@ -29,7 +29,7 @@ def validate_matrix(
 
 
 def validate_probabilities(
-    probs: Union[np.ndarray, list],
+    probs: npt.NDArray[np.float64] | list[float],
     name: str = 'Probabilities',
     allow_zero: bool = True,
 ) -> None:
@@ -57,10 +57,10 @@ def validate_probabilities(
 
 
 def validate_stochastic_matrix(
-    matrix: np.ndarray,
+    matrix: npt.NDArray[np.float64],
     axis: int = 1,
     tolerance: float = 1e-6,
-    name: str = 'Matrix'
+    name: str = 'Matrix',
 ) -> None:
     """
     Validate that a matrix is stochastic (rows or columns sum to 1).
@@ -86,12 +86,12 @@ def validate_stochastic_matrix(
 
 
 def validate_dimensions_match(
-    arr1: np.ndarray,
-    arr2: np.ndarray,
+    arr1: npt.NDArray[np.float64],
+    arr2: npt.NDArray[np.float64],
     dim1: int,
     dim2: int,
     name1: str = 'Array 1',
-    name2: str = 'Array 2'
+    name2: str = 'Array 2',
 ) -> None:
     """
     Validate that specified dimensions of two arrays match.

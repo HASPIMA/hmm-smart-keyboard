@@ -1,6 +1,7 @@
 """Distance calculation utilities for keyboard layout."""
 
 import numpy as np
+import numpy.typing as npt
 
 
 def euclidean_distance(
@@ -40,8 +41,8 @@ def manhattan_distance(
 def get_nearby_keys(
     key_position: tuple[float, float],
     keyboard_layout: dict[str, tuple[float, float]],
-    max_distance: float = 1.5
-) -> list:
+    max_distance: float = 1.5,
+) -> list[tuple[str, float]]:
     """
     Get keys within a certain distance of a given key position.
 
@@ -66,7 +67,7 @@ def get_nearby_keys(
 
 def calculate_distance_matrix(
     keyboard_layout: dict[str, tuple[float, float]],
-) -> np.ndarray:
+) -> npt.NDArray[np.float64]:
     """
     Calculate pairwise distance matrix for all keys in a keyboard layout.
 

@@ -1,7 +1,6 @@
 """Text processing utilities for HMM Smart Keyboard."""
 
 import re
-from typing import List
 
 
 def normalize_text(
@@ -30,7 +29,7 @@ def normalize_text(
 def tokenize(
     text: str,
     by_word: bool = True,
-) -> List[str]:
+) -> list[str]:
     """
     Tokenize text into words or characters.
 
@@ -64,7 +63,7 @@ def remove_punctuation(text: str) -> str:
     return re.sub(r'[^\w\s]', '', text)
 
 
-def get_character_set(text: str) -> set:
+def get_character_set(text: str) -> set[str]:
     """
     Extract unique characters from text.
 
