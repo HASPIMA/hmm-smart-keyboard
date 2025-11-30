@@ -224,3 +224,7 @@ __marimo__/
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+# Data files
+P_matrix_transicion.json
+eswiki-latest-pages-articles-multistream.xml.bz2
