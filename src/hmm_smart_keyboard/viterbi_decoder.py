@@ -159,40 +159,40 @@ class ViterbiDecoder:
     def _generate_audit_data(self, dirty_words, viterbi, corrected_words):
         """
         Genera los datos para la tabla de auditoría de la UI.
-        Solo mostramos detalles de la ÚLTIMA palabra (para no saturar la pantalla).
+        Mostramos detalles de la ÚLTIMA palabra.
         """
         last_idx = len(dirty_words) - 1
         last_dirty = dirty_words[last_idx]
         last_corrected = corrected_words[last_idx]
-        
-        # Obtener el top 5 de candidatos del último paso
+
         last_step = viterbi[last_idx]
-        
+
         ranking = []
         prev_word = corrected_words[last_idx - 1] if last_idx > 0 else self.START_TOKEN
-        
-        for candidate in last_step:
-            score_total, _ = last_step[candidate]
-            
-            # Recalcular componentes individuales para mostrar en la tabla
+
+        for candidate, (score_total, _) in last_step.items():
+            # Componentes individuales solo para mostrar
             emission = self.km.get_emission_log_prob(last_dirty, candidate)
             transition = self.lm.get_transition_log_prob(prev_word, candidate)
-            
-        ranking.append({
-            "palabra": candidate,
-            "ctx": float(round(transition, 2)),
-            "kbd": float(round(emission, 2)),
-            "total": float(round(score_total, 2)),
-        })
 
-        
-        # Ordenar por score total
-        ranking.sort(key=lambda x: x['total'], reverse=True)
-        
+            ranking.append({
+                "palabra": candidate,
+                "ctx": float(round(transition, 2)),
+                "kbd": float(round(emission, 2)),
+                # OJO: usamos el score_total del camino completo
+                "total": float(round(score_total, 2)),
+            })
+
+        # Ordenar por el mismo score que usó Viterbi
+        ranking.sort(key=lambda x: x["total"], reverse=True)
+
+        # (opcional) sanity check interno: el primero del ranking debe ser el ganador
+        # assert ranking[0]["palabra"] == last_corrected
+
         return {
             "input_original": last_dirty,
             "ganador": last_corrected,
-            "ranking": ranking[:5]  # Mostrar solo top 5 en la UI
+            "ranking": ranking[:5],  # top 5
         }
 
 
