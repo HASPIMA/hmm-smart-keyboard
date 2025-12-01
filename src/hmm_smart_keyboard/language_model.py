@@ -14,7 +14,11 @@ import bz2
 script_path = os.path.abspath(__file__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(script_path)))
 DUMP_PATH = os.path.join(BASE_DIR, 'eswiki-latest-pages-articles-multistream.xml.bz2')
-OUTPUT_FILENAME = "P_matrix_transicion.json"
+
+# Guardar la matriz en el directorio data del proyecto
+current_dir = os.path.dirname(__file__)
+data_dir = os.path.join(current_dir, 'data')
+OUTPUT_FILENAME = os.path.join(data_dir, "P_matrix_transicion.json")
 
 
 # --- 2. PRE-PROCESAMIENTO Y LIMPIEZA ---
@@ -165,6 +169,10 @@ def main():
 
     # 3. Guardado en Disco (UJSON para archivos grandes)
     print(f"Guardando la matriz de {len(P_matrix)} entradas...")
+    
+    # Crear el directorio data si no existe
+    os.makedirs(data_dir, exist_ok=True)
+    
     try:
         with open(OUTPUT_FILENAME, 'w', encoding='utf-8') as f:
             # indent=4 para legibilidad; si la matriz es gigante, quítalo

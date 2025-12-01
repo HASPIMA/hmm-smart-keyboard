@@ -1,5 +1,5 @@
 import math
-from keyboard_model import KeyboardModel
+#from keyboard_model import KeyboardModel
 
 class ViterbiDecoder:
     def __init__(self, language_model, keyboard_model):
@@ -46,6 +46,9 @@ class ViterbiDecoder:
         first_candidates = self.km.get_candidates(first_word_dirty)
         
         for candidate in first_candidates:
+            # Transición: desde START hacia la primera palabra
+            transition = self.lm.get_transition_log_prob(self.START_TOKEN, candidate)
+
             # Emisión: ¿Qué tan probable es que escribiera esto?
             emission = self.km.get_emission_log_prob(first_word_dirty, candidate)
             
@@ -228,6 +231,7 @@ if __name__ == "__main__":
     
     result = decoder.solve("dl gato")
     print("=== RESULTADO ===")
+    print(f"Texto original: dl gato")
     print(f"Corrección: {result['corrected_text']}")
     print(f"Score: {result['best_score']}")
     print(f"Auditoría: {result['audit_data']}")
