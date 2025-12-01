@@ -2,6 +2,9 @@
 #                Python.gitignore                #
 ##################################################
 
+#Big files
+**/P_matrix_transicion.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
