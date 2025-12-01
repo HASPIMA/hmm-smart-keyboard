@@ -12,7 +12,7 @@ from hmm_smart_keyboard.utils.text_processing import normalize_text, tokenize
 
 # --- 1. CONFIGURACIÓN Y ARCHIVOS ---
 
-START_TOKEN = "<START>"
+START_TOKEN = "<START>"  # noqa: S105
 
 # Solución para rutas absolutas: Garantiza encontrar el dump sin importar el CWD
 script_path = Path(__file__).resolve()
@@ -83,8 +83,8 @@ def extract_and_clean_tokens(dump_path: str | Path) -> Iterator[str]:
     except FileNotFoundError:
         print(f"❌ ERROR: El archivo del dump NO se encontró en: {dump_path}")
 
-    except Exception as e:
-        # Captura errores de parsing XML (not well-formed)
+    except (OSError, ValueError, AttributeError) as e:
+        # Captura errores de parsing XML (not well-formed) y errores de I/O
         print(f"❌ ERROR CRÍTICO durante el parsing XML: {e}")
         print(
             "El archivo podría estar corrupto o no es un dump válido de artículos. Deteniendo.",
@@ -160,7 +160,7 @@ def main():
     # Manejar el caso donde el generador no produce tokens (ej. error en el parseo)
     try:
         unigrams, bigrams = count_frequencies(token_stream)
-    except Exception:
+    except (OSError, ValueError, AttributeError, KeyError):
         # Si el error ocurrió dentro de extract_and_clean_tokens, ya se imprimió un error crítico.
         # Salimos de main.
         return
@@ -171,7 +171,7 @@ def main():
         )
         return
 
-    print(f"\nResumen del Corpus:")
+    print("\nResumen del Corpus:")
     print(f"  - Vocabulario (Unigramas únicos): {len(unigrams):,}")
     print(f"  - Bigramas únicos: {len(bigrams):,}")
 
@@ -189,7 +189,7 @@ def main():
             # indent=4 para legibilidad; si la matriz es gigante, quítalo
             json.dump(p_matrix, f, ensure_ascii=False, indent=4)
         print(f"✅ ¡Proceso completado! Matriz guardada en: {OUTPUT_FILENAME}")
-    except IOError as e:
+    except OSError as e:
         print(f"Error al guardar el archivo: {e}")
 
 
@@ -199,7 +199,7 @@ class LanguageModel:
     get_transition_log_prob(prev, curr) que devuelve log P(curr | prev).
 
     Esta es la interfaz que necesita ViterbiDecoder.
-    """
+    """  # noqa: D205
 
     def __init__(
         self,
@@ -210,7 +210,7 @@ class LanguageModel:
         :param matrix_path: ruta al archivo P_matrix_transicion.json.
                             Si es None, usa OUTPUT_FILENAME definido arriba.
         :param unk_log_prob: log-probabilidad por defecto para bigramas no vistos.
-        """
+        """  # noqa: D205
         self.unk_log_prob = unk_log_prob
         self.START_TOKEN = START_TOKEN
 
@@ -221,8 +221,9 @@ class LanguageModel:
             matrix_path = Path(matrix_path)
 
         if not Path(matrix_path).exists():
+            msg = f"No se encontró la matriz de transición en: {matrix_path}"
             raise FileNotFoundError(
-                f"No se encontró la matriz de transición en: {matrix_path}",
+                msg,
             )
 
         # Cargar la matriz de transición generada por main()
