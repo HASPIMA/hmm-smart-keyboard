@@ -1,21 +1,20 @@
-import math
 import json
-import os
+from pathlib import Path
 
-import numpy as np
 from wordfreq import top_n_list
-from .utils import distance
+
+from hmm_smart_keyboard.utils import distance
 
 
 class KeyboardModel:
 
     def __init__(self, vocab):
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        file_path = dir_path + "/data/keyboard_es.json"
+        dir_path = Path(__file__).resolve().parent
+        file_path = dir_path / "data" / "keyboard_es.json"
 
         self.vocabulary = set(vocab)
 
-        with open(file_path, "r", encoding="utf-8") as f:
+        with file_path.open("r", encoding="utf-8") as f:
             self.keyboard_map = json.load(f)
 
         self.sigma = 2
@@ -31,12 +30,12 @@ class KeyboardModel:
                 self.buckets[key] = []
             self.buckets[key].append(word)
 
-    def get_emission_log_prob(self, dirty_word, intended_word):
+    def get_emission_log_prob(self, dirty_word: str, intended_word: str):
         """
         Retorna log P(dirty | intended) basado en la distancia euclidiana
         entre teclas. Valores cercanos a 0 => error muy plausible.
         Valores muy negativos => error raro.
-        """
+        """  # noqa: D205
         if not dirty_word or not intended_word:
             return -1e9  # casi imposible
 
@@ -53,10 +52,13 @@ class KeyboardModel:
             c1_coords = self.keyboard_map[c1]
             c2_coords = self.keyboard_map[c2]
 
-            x1, y1 = c1_coords["x"], c1_coords["y"]
-            x2, y2 = c2_coords["x"], c2_coords["y"]
+            x1, y1 = float(c1_coords["x"]), float(c1_coords["y"])
+            x2, y2 = float(c2_coords["x"]), float(c2_coords["y"])
 
-            dist = distance.euclidean_distance([x1, y1], [x2, y2])
+            dist = distance.euclidean_distance(
+                (x1, y1),
+                (x2, y2),
+            )
 
             # Error gaussiano (sin constante de normalización, para ranking basta)
             char_log_prob = - (dist ** 2) / (2 * self.variance)
@@ -76,7 +78,7 @@ class KeyboardModel:
 
         - Filtra por longitud similar (L, L+1, L-1) y misma primera letra.
         - Usa get_emission_log_prob para puntuar y se queda con las top `limit`.
-        """
+        """  # noqa: D205
         if not dirty_word:
             return []
 
