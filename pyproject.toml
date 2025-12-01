@@ -11,12 +11,14 @@ dependencies = [
     "mwxml>=0.3.6",
     "nltk>=3.9.2",
     "numpy>=2.3.5",
+    "pyqt5>=5.15.11",
     "ujson>=5.11.0",
     "wordfreq>=3.1.1",
 ]
 
 [project.scripts]
 hmm-smart-keyboard = "hmm_smart_keyboard:main"
+gui-sk = "hmm_smart_keyboard:gui"
 
 [build-system]
 requires = ["uv_build>=0.8.15,<0.9.0"]
