@@ -8,11 +8,10 @@ from pathlib import Path
 import mwxml
 import ujson as json
 
+from hmm_smart_keyboard.constants import START_TOKEN
 from hmm_smart_keyboard.utils.text_processing import normalize_text, tokenize
 
 # --- 1. CONFIGURACIÓN Y ARCHIVOS ---
-
-START_TOKEN = "<START>"  # noqa: S105
 
 # Solución para rutas absolutas: Garantiza encontrar el dump sin importar el CWD
 script_path = Path(__file__).resolve()
@@ -199,7 +198,7 @@ class LanguageModel:
     get_transition_log_prob(prev, curr) que devuelve log P(curr | prev).
 
     Esta es la interfaz que necesita ViterbiDecoder.
-    """  # noqa: D205
+    """
 
     def __init__(
         self,
@@ -210,7 +209,7 @@ class LanguageModel:
         :param matrix_path: ruta al archivo P_matrix_transicion.json.
                             Si es None, usa OUTPUT_FILENAME definido arriba.
         :param unk_log_prob: log-probabilidad por defecto para bigramas no vistos.
-        """  # noqa: D205
+        """
         self.unk_log_prob = unk_log_prob
         self.START_TOKEN = START_TOKEN
 
@@ -283,4 +282,5 @@ class LanguageModel:
 
 
 if __name__ == "__main__":
+    main()
     main()

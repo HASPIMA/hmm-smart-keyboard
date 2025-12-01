@@ -101,4 +101,5 @@ ignore = [
     "PLR0913", # Pylint - too many arguments in function/method
     "FBT001", # Flake8-boolean-trap - using boolean values as default argument values
     "FBT002", # Flake8-boolean-trap - using boolean values in logical operations
+    "D205",  # Pydocstyle - 1 blank line required between summary line and description
 ]

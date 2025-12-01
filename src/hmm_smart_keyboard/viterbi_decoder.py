@@ -1,6 +1,7 @@
 import math
 
-#from keyboard_model import KeyboardModel
+from hmm_smart_keyboard.constants import START_TOKEN
+
 
 class ViterbiDecoder:
     def __init__(self, language_model, keyboard_model):
@@ -8,7 +9,7 @@ class ViterbiDecoder:
         self.km = keyboard_model
 
         # Token especial para inicio de frase
-        self.START_TOKEN = "<START>"
+        self.START_TOKEN = START_TOKEN
 
         # Hiperparámetro: Balance entre contexto y teclado
         # Si alpha=1.0, ambos pesan igual
@@ -19,7 +20,7 @@ class ViterbiDecoder:
     def solve(self, sentence_dirty):
         """
         Ejecuta el algoritmo de Viterbi para encontrar la mejor corrección.
-        
+
         :param sentence_dirty: String con errores, ej: "el gsto come"
         :return: Dict con texto corregido y datos de auditoría
         """
@@ -40,7 +41,6 @@ class ViterbiDecoder:
         # backpointer = palabra del paso anterior que llevó a este camino
 
         viterbi = [{}]  # Lista de diccionarios
-        path = {}       # Para reconstruir el camino
 
         # PASO 2: Inicialización (t=0, primera palabra)
         first_word_dirty = words[0]
@@ -120,7 +120,7 @@ class ViterbiDecoder:
         }
 
     def _solve_single_word(self, word_dirty):
-        """Caso especial optimizado para una sola palabra"""
+        """Caso especial optimizado para una sola palabra."""
         candidates = self.km.get_candidates(word_dirty)
 
         best_word = word_dirty

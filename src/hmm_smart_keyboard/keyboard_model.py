@@ -35,7 +35,7 @@ class KeyboardModel:
         Retorna log P(dirty | intended) basado en la distancia euclidiana
         entre teclas. Valores cercanos a 0 => error muy plausible.
         Valores muy negativos => error raro.
-        """  # noqa: D205
+        """
         if not dirty_word or not intended_word:
             return -1e9  # casi imposible
 
@@ -82,7 +82,7 @@ class KeyboardModel:
 
         - Filtra por longitud similar (L, L+1, L-1) y misma primera letra.
         - Usa get_emission_log_prob para puntuar y se queda con las top `limit`.
-        """  # noqa: D205
+        """
         if not dirty_word:
             return []
 
