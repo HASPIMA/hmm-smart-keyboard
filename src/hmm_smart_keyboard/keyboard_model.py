@@ -41,7 +41,11 @@ class KeyboardModel:
 
         log_prob_total = 0.0
 
-        for dirty_char, intended_char in zip(dirty_word, intended_word):
+        for dirty_char, intended_char in zip(
+            dirty_word,
+            intended_word,
+            strict=False,
+        ):
             c1 = dirty_char.lower()
             c2 = intended_char.lower()
 

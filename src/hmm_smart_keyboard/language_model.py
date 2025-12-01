@@ -236,19 +236,19 @@ class LanguageModel:
         vocab = set()
 
         for prev_word, next_dict in transition_matrix.items():
-            prev_word = prev_word.strip().lower()
+            clean_prev_word = prev_word.strip().lower()
             inner: dict[str, float] = {}
 
             for next_word, p in next_dict.items():
-                next_word = next_word.strip().lower()
+                clean_next_word = next_word.strip().lower()
 
                 log_p = self.unk_log_prob if p <= 0.0 else math.log(p)
 
-                inner[next_word] = log_p
-                vocab.add(prev_word)
-                vocab.add(next_word)
+                inner[clean_next_word] = log_p
+                vocab.add(clean_prev_word)
+                vocab.add(clean_next_word)
 
-            self.bigram_log_probs[prev_word] = inner
+            self.bigram_log_probs[clean_prev_word] = inner
 
         self.vocab = vocab
         # Distribución inicial aproximada para <START>: uniforme sobre el vocabulario
