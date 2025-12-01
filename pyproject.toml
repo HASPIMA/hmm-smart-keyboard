@@ -98,4 +98,5 @@ ignore = [
     "FA102", # Flake8-future-annotations - Missing `from __future__ import annotations`, but uses PEP 604 union
     "TRY003", # Tryceratops - Checks for long exception messages that are not defined in the exception class itself.
     "EM101", # Flake8-errmsg - Checks for the use of string literals in exception constructors.
+    "PLR0913", # Pylint - too many arguments in function/method
 ]
