@@ -6,6 +6,7 @@ from typing import Iterator, Tuple, Dict
 from utils.text_processing import tokenize, normalize_text, remove_punctuation
 import os 
 import bz2 
+import math
 
 
 # --- 1. CONFIGURACIÓN Y ARCHIVOS ---
@@ -180,6 +181,91 @@ def main():
         print(f"✅ ¡Proceso completado! Matriz guardada en: {OUTPUT_FILENAME}")
     except IOError as e:
         print(f"Error al guardar el archivo: {e}")
+
+class LanguageModel:
+    """
+    Carga la matriz P_matrix_transicion.json y expone
+    get_transition_log_prob(prev, curr) que devuelve log P(curr | prev).
+
+    Esta es la interfaz que necesita ViterbiDecoder.
+    """
+
+    def __init__(self, matrix_path: str = None, unk_log_prob: float = -15.0):
+        """
+        :param matrix_path: ruta al archivo P_matrix_transicion.json.
+                            Si es None, usa OUTPUT_FILENAME definido arriba.
+        :param unk_log_prob: log-probabilidad por defecto para bigramas no vistos.
+        """
+        self.unk_log_prob = unk_log_prob
+        self.START_TOKEN = "<START>"
+
+        # Usar la ruta por defecto si no recibimos una específica
+        if matrix_path is None:
+            matrix_path = OUTPUT_FILENAME
+
+        if not os.path.exists(matrix_path):
+            raise FileNotFoundError(
+                f"No se encontró la matriz de transición en: {matrix_path}"
+            )
+
+        # Cargar la matriz de transición generada por main()
+        with open(matrix_path, "r", encoding="utf-8") as f:
+            transition_matrix = json.load(f)
+
+        # Pasar a log-probs para trabajar en espacio logarítmico
+        # Estructura interna: self.bigram_log_probs[prev][curr] = log P(curr | prev)
+        self.bigram_log_probs: Dict[str, Dict[str, float]] = {}
+        vocab = set()
+
+        for prev_word, next_dict in transition_matrix.items():
+            prev_word = prev_word.strip().lower()
+            inner: Dict[str, float] = {}
+
+            for next_word, p in next_dict.items():
+                next_word = next_word.strip().lower()
+
+                if p <= 0.0:
+                    log_p = self.unk_log_prob
+                else:
+                    log_p = math.log(p)
+
+                inner[next_word] = log_p
+                vocab.add(prev_word)
+                vocab.add(next_word)
+
+            self.bigram_log_probs[prev_word] = inner
+
+        self.vocab = vocab
+        # Distribución inicial aproximada para <START>: uniforme sobre el vocabulario
+        if self.vocab:
+            self.start_log_prob = -math.log(len(self.vocab))
+        else:
+            self.start_log_prob = self.unk_log_prob
+
+    def get_transition_log_prob(self, prev_word: str, curr_word: str) -> float:
+        """
+        Devuelve log P(curr_word | prev_word).
+
+        - Si prev_word == <START>: usamos una distribución inicial uniforme.
+        - Si el bigrama existe en la matriz: devolvemos log(p) cargado.
+        - Si no existe: devolvemos unk_log_prob (backoff muy bajo).
+        """
+        prev_word = prev_word.strip().lower()
+        curr_word = curr_word.strip().lower()
+
+        # Caso especial: inicio de frase
+        if prev_word == self.START_TOKEN:
+            return self.start_log_prob
+
+        # Bigrama observado
+        if prev_word in self.bigram_log_probs:
+            inner = self.bigram_log_probs[prev_word]
+            if curr_word in inner:
+                return inner[curr_word]
+
+        # Bigrama no visto
+        return self.unk_log_prob
+
 
 if __name__ == "__main__":
     main()
