@@ -1,6 +1,6 @@
-from language_model import LanguageModel
-from keyboard_model import KeyboardModel
-from viterbi_decoder import ViterbiDecoder
+from .language_model import LanguageModel
+from .keyboard_model import KeyboardModel
+from .viterbi_decoder import ViterbiDecoder
 from wordfreq import top_n_list
 
 if __name__ == "__main__":

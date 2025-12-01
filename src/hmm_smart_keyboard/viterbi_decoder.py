@@ -130,14 +130,15 @@ class ViterbiDecoder:
             emission = self.km.get_emission_log_prob(word_dirty, candidate)
             transition = self.lm.get_transition_log_prob(self.START_TOKEN, candidate)
             total = (self.alpha * transition) + (self.beta * emission)
-            
+
             ranking.append({
                 "palabra": candidate,
-                "ctx": transition,
-                "kbd": emission,
-                "total": total
+                "ctx": float(transition),
+                "kbd": float(emission),
+                "total": float(total),
             })
-            
+
+
             if total > best_score:
                 best_score = total
                 best_word = candidate
@@ -177,12 +178,13 @@ class ViterbiDecoder:
             emission = self.km.get_emission_log_prob(last_dirty, candidate)
             transition = self.lm.get_transition_log_prob(prev_word, candidate)
             
-            ranking.append({
-                "palabra": candidate,
-                "ctx": round(transition, 2),
-                "kbd": round(emission, 2),
-                "total": round(score_total, 2)
-            })
+        ranking.append({
+            "palabra": candidate,
+            "ctx": float(round(transition, 2)),
+            "kbd": float(round(emission, 2)),
+            "total": float(round(score_total, 2)),
+        })
+
         
         # Ordenar por score total
         ranking.sort(key=lambda x: x['total'], reverse=True)

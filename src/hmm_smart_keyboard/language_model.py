@@ -3,11 +3,10 @@ import re
 import ujson as json
 from collections import Counter
 from typing import Iterator, Tuple, Dict
-from utils.text_processing import tokenize, normalize_text, remove_punctuation
-import os 
-import bz2 
+from .utils.text_processing import tokenize, normalize_text, remove_punctuation
+import os
+import bz2
 import math
-
 
 # --- 1. CONFIGURACIÓN Y ARCHIVOS ---
 

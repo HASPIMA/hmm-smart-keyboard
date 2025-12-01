@@ -4,7 +4,7 @@ import os
 
 import numpy as np
 from wordfreq import top_n_list
-from utils import distance
+from .utils import distance
 
 
 class KeyboardModel:
