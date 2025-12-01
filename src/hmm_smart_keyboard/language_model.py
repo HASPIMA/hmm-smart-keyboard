@@ -201,44 +201,47 @@ class LanguageModel:
     Esta es la interfaz que necesita ViterbiDecoder.
     """
 
-    def __init__(self, matrix_path: str = None, unk_log_prob: float = -15.0):
+    def __init__(
+        self,
+        matrix_path: Path | str | None = None,
+        unk_log_prob: float = -15.0,
+    ):
         """
         :param matrix_path: ruta al archivo P_matrix_transicion.json.
                             Si es None, usa OUTPUT_FILENAME definido arriba.
         :param unk_log_prob: log-probabilidad por defecto para bigramas no vistos.
         """
         self.unk_log_prob = unk_log_prob
-        self.START_TOKEN = "<START>"
+        self.START_TOKEN = START_TOKEN
 
         # Usar la ruta por defecto si no recibimos una específica
         if matrix_path is None:
             matrix_path = OUTPUT_FILENAME
+        elif isinstance(matrix_path, str):
+            matrix_path = Path(matrix_path)
 
-        if not os.path.exists(matrix_path):
+        if not Path(matrix_path).exists():
             raise FileNotFoundError(
-                f"No se encontró la matriz de transición en: {matrix_path}"
+                f"No se encontró la matriz de transición en: {matrix_path}",
             )
 
         # Cargar la matriz de transición generada por main()
-        with open(matrix_path, "r", encoding="utf-8") as f:
-            transition_matrix = json.load(f)
+        with Path(matrix_path).open("r", encoding="utf-8") as f:
+            transition_matrix: dict[str, dict[str, float]] = json.load(f)
 
         # Pasar a log-probs para trabajar en espacio logarítmico
         # Estructura interna: self.bigram_log_probs[prev][curr] = log P(curr | prev)
-        self.bigram_log_probs: Dict[str, Dict[str, float]] = {}
+        self.bigram_log_probs: dict[str, dict[str, float]] = {}
         vocab = set()
 
         for prev_word, next_dict in transition_matrix.items():
             prev_word = prev_word.strip().lower()
-            inner: Dict[str, float] = {}
+            inner: dict[str, float] = {}
 
             for next_word, p in next_dict.items():
                 next_word = next_word.strip().lower()
 
-                if p <= 0.0:
-                    log_p = self.unk_log_prob
-                else:
-                    log_p = math.log(p)
+                log_p = self.unk_log_prob if p <= 0.0 else math.log(p)
 
                 inner[next_word] = log_p
                 vocab.add(prev_word)
