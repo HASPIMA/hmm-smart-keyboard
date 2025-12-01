@@ -15,7 +15,7 @@ class ViterbiDecoder:
         # Si alpha=1.0, ambos pesan igual
         # Si alpha=2.0, el contexto pesa el doble
         self.alpha = 1.0  # Peso del Language Model
-        self.beta = 1.0   # Peso del Keyboard Model
+        self.beta = 2.0   # Peso del Keyboard Model
 
     def solve(self, sentence_dirty):
         """
@@ -48,13 +48,12 @@ class ViterbiDecoder:
 
         for candidate in first_candidates:
             # Transición: desde START hacia la primera palabra
-            transition = self.lm.get_transition_log_prob(self.START_TOKEN, candidate)
 
             # Emisión: ¿Qué tan probable es que escribiera esto?
             emission = self.km.get_emission_log_prob(first_word_dirty, candidate)
 
             # Score combinado (ponderado)
-            score = (self.alpha * transition) + (self.beta * emission)
+            score = self.beta * emission
 
             viterbi[0][candidate] = (score, self.START_TOKEN)
 
@@ -160,41 +159,38 @@ class ViterbiDecoder:
     def _generate_audit_data(self, dirty_words, viterbi, corrected_words):
         """
         Genera los datos para la tabla de auditoría de la UI.
-        Mostramos detalles de la ÚLTIMA palabra.
+        Ahora devuelve una entrada por cada palabra de la frase, con su ranking.
         """
-        last_idx = len(dirty_words) - 1
-        last_dirty = dirty_words[last_idx]
-        last_corrected = corrected_words[last_idx]
+        audit_per_word = []
 
-        last_step = viterbi[last_idx]
+        for t in range(len(dirty_words)):
+            dirty = dirty_words[t]
+            corrected = corrected_words[t]
+            step = viterbi[t]
+            prev_word = corrected_words[t - 1] if t > 0 else self.START_TOKEN
 
-        ranking = []
-        prev_word = corrected_words[last_idx - 1] if last_idx > 0 else self.START_TOKEN
+            ranking = []
+            for candidate, (score_total, _) in step.items():
+                emission = self.km.get_emission_log_prob(dirty, candidate)
+                transition = self.lm.get_transition_log_prob(prev_word, candidate)
 
-        for candidate, (score_total, _) in last_step.items():
-            # Componentes individuales solo para mostrar
-            emission = self.km.get_emission_log_prob(last_dirty, candidate)
-            transition = self.lm.get_transition_log_prob(prev_word, candidate)
+                ranking.append({
+                    "palabra": candidate,
+                    "ctx": float(round(transition, 2)),
+                    "kbd": float(round(emission, 2)),
+                    "total": float(round(score_total, 2)),
+                })
 
-            ranking.append({
-                "palabra": candidate,
-                "ctx": float(round(transition, 2)),
-                "kbd": float(round(emission, 2)),
-                # OJO: usamos el score_total del camino completo
-                "total": float(round(score_total, 2)),
+            ranking.sort(key=lambda x: x["total"], reverse=True)
+
+            audit_per_word.append({
+                "index": t,
+                "input_original": dirty,
+                "ganador": corrected,
+                "ranking": ranking[:5],  # top 5 por palabra
             })
 
-        # Ordenar por el mismo score que usó Viterbi
-        ranking.sort(key=lambda x: x["total"], reverse=True)
-
-        # (opcional) sanity check interno: el primero del ranking debe ser el ganador
-        # assert ranking[0]["palabra"] == last_corrected
-
-        return {
-            "input_original": last_dirty,
-            "ganador": last_corrected,
-            "ranking": ranking[:5],  # top 5
-        }
+        return audit_per_word
 
 
 # --- PRUEBA UNITARIA (Equipo B debe correr esto) ---
