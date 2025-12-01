@@ -16,9 +16,10 @@ def normalize_text(
 
     Returns:
         Normalized text string
+
     """
     # Remove extra whitespace
-    text = re.sub(r'\s+', ' ', text.strip())
+    text = re.sub(r"\s+", " ", text.strip())
 
     if lowercase:
         text = text.lower()
@@ -39,10 +40,11 @@ def tokenize(
 
     Returns:
         List of tokens
+
     """
     if by_word:
         # Split by whitespace and punctuation
-        tokens = re.findall(r'\b\w+\b', text.lower())
+        tokens = re.findall(r"\b\w+\b", text.lower())
     else:
         # Split into individual characters (excluding whitespace)
         tokens = [char for char in text if not char.isspace()]
@@ -59,8 +61,9 @@ def remove_punctuation(text: str) -> str:
 
     Returns:
         Text with punctuation removed
+
     """
-    return re.sub(r'[^\w\s]', '', text)
+    return re.sub(r"[^\w\s]", "", text)
 
 
 def get_character_set(text: str) -> set[str]:
@@ -72,5 +75,6 @@ def get_character_set(text: str) -> set[str]:
 
     Returns:
         Set of unique characters
+
     """
-    return set(char.lower() for char in text if char.isalpha())
+    return {char.lower() for char in text if char.isalpha()}

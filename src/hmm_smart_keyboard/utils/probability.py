@@ -13,9 +13,10 @@ def log_probability(prob: float) -> float:
 
     Returns:
         Log probability, or negative infinity for zero probability
+
     """
     if prob == 0:
-        return float('-inf')
+        return float("-inf")
     return np.log(prob)
 
 
@@ -33,12 +34,13 @@ def normalize_probabilities(
 
     Raises:
         ValueError: If all probabilities are zero
+
     """
     probs = np.array(probs, dtype=float)
     total = np.sum(probs)
 
     if total == 0:
-        raise ValueError('Cannot normalize: all probabilities are zero')
+        raise ValueError("Cannot normalize: all probabilities are zero")
 
     return probs / total
 
@@ -56,10 +58,11 @@ def add_log_probabilities(
 
     Returns:
         Log of the sum of probabilities
+
     """
-    if log_prob1 == float('-inf'):
+    if log_prob1 == float("-inf"):
         return log_prob2
-    if log_prob2 == float('-inf'):
+    if log_prob2 == float("-inf"):
         return log_prob1
 
     # log(exp(a) + exp(b)) = max + log(exp(a-max) + exp(b-max))
@@ -78,10 +81,11 @@ def exp_normalize(
 
     Returns:
         Normalized probability array
+
     """
     # Subtract max for numerical stability
     max_log = np.max(log_probs)
-    if max_log == float('-inf'):
+    if max_log == float("-inf"):
         return np.zeros_like(log_probs)
 
     exp_probs = np.exp(log_probs - max_log)

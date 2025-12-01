@@ -6,6 +6,8 @@
     "ms-python.autopep8",
     "usernamehw.errorlens",
     "davidanson.vscode-markdownlint",
-    "yzhang.markdown-all-in-one"
+    "yzhang.markdown-all-in-one",
+    "charliermarsh.ruff",
+    "tamasfe.even-better-toml"
   ]
 }

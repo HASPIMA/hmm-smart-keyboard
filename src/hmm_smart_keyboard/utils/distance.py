@@ -17,6 +17,7 @@ def euclidean_distance(
 
     Returns:
         Euclidean distance between points
+
     """
     return np.sqrt((pos1[0] - pos2[0])**2 + (pos1[1] - pos2[1])**2)
 
@@ -34,6 +35,7 @@ def manhattan_distance(
 
     Returns:
         Manhattan distance between points
+
     """
     return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
 
@@ -53,6 +55,7 @@ def get_nearby_keys(
 
     Returns:
         List of (key, distance) tuples for nearby keys
+
     """
     nearby = []
     for key, pos in keyboard_layout.items():
@@ -76,6 +79,7 @@ def calculate_distance_matrix(
 
     Returns:
         Distance matrix where element [i,j] is distance between key i and key j
+
     """
     keys = sorted(keyboard_layout.keys())
     n = len(keys)
@@ -86,7 +90,7 @@ def calculate_distance_matrix(
             if i != j:
                 distance_matrix[i, j] = euclidean_distance(
                     keyboard_layout[key1],
-                    keyboard_layout[key2]
+                    keyboard_layout[key2],
                 )
 
     return distance_matrix

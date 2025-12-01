@@ -1,7 +1,8 @@
-from .language_model import LanguageModel
-from .keyboard_model import KeyboardModel
-from .viterbi_decoder import ViterbiDecoder
 from wordfreq import top_n_list
+
+from hmm_smart_keyboard.keyboard_model import KeyboardModel
+from hmm_smart_keyboard.language_model import LanguageModel
+from hmm_smart_keyboard.viterbi_decoder import ViterbiDecoder
 
 if __name__ == "__main__":
     vocab = top_n_list("es", 20000)
