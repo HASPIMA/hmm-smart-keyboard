@@ -37,7 +37,7 @@ def validate_matrix(
 def validate_probabilities(
     probs: npt.NDArray[np.float64] | list[float],
     name: str = "Probabilities",
-    allow_zero: bool = True,  # noqa: FBT001, FBT002
+    allow_zero: bool = True,
 ) -> None:
     """
     Validate that values represent valid probabilities.
