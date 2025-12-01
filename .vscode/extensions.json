@@ -7,6 +7,7 @@
     "usernamehw.errorlens",
     "davidanson.vscode-markdownlint",
     "yzhang.markdown-all-in-one",
-    "charliermarsh.ruff"
+    "charliermarsh.ruff",
+    "tamasfe.even-better-toml"
   ]
 }
