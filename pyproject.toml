@@ -8,8 +8,10 @@ authors = [
 ]
 requires-python = ">=3.13"
 dependencies = [
+    "mwxml>=0.3.6",
     "nltk>=3.9.2",
     "numpy>=2.3.5",
+    "ujson>=5.11.0",
     "wordfreq>=3.1.1",
 ]
 
