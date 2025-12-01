@@ -1,7 +1,8 @@
-from .language_model import LanguageModel
-from .keyboard_model import KeyboardModel
-from .viterbi_decoder import ViterbiDecoder
 from wordfreq import top_n_list
+
+from .keyboard_model import KeyboardModel
+from .language_model import LanguageModel
+from .viterbi_decoder import ViterbiDecoder
 
 
 def main():
@@ -41,7 +42,7 @@ def main():
                 f"    {item['palabra']:>12} | "
                 f"ctx={item['ctx']:.2f} | "
                 f"kbd={item['kbd']:.2f} | "
-                f"total={item['total']:.2f}"
+                f"total={item['total']:.2f}",
             )
         print("\n")
 

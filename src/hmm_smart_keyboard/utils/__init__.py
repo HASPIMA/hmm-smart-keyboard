@@ -5,10 +5,10 @@ from .text_processing import normalize_text, tokenize
 from .validation import validate_matrix, validate_probabilities
 
 __all__ = [
-    'normalize_text',
-    'tokenize',
-    'log_probability',
-    'normalize_probabilities',
-    'validate_matrix',
-    'validate_probabilities',
+    "log_probability",
+    "normalize_probabilities",
+    "normalize_text",
+    "tokenize",
+    "validate_matrix",
+    "validate_probabilities",
 ]
