@@ -35,8 +35,6 @@ class KeyboardModel:
         teclas
         '''
 
-        if len(dirty_word) != len(intended_word):
-            return -100.0
 
         log_prob_total = 0.0
 
