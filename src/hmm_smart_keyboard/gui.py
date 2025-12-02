@@ -21,19 +21,59 @@ class MainWindow(QMainWindow):
         # Variables
         self.results = {
             "corrected_text": "",
+            "original_text": "",
             "best_score": 9999,
-            "audit_data": {
-                "input_original": "",
-                "ganador": "",
-                "ranking": [
-                    {
-                        "palabra": "",
-                        "ctx": "",
-                        "kbd": "",
-                        "total": "",
-                    }
-                ],
-            },
+            "audit_data": [
+                {
+                    "index": 0,
+                    "input_original": "hola",
+                    "ganador": "hija",
+                    "ranking": [
+                        {"palabra": "hola", "ctx": -15.0, "kbd": 0.0, "total": 0.0},
+                        {"palabra": "hoja", "ctx": -15.0, "kbd": -0.5, "total": -1.0},
+                        {"palabra": "hope", "ctx": -15.0, "kbd": -0.56, "total": -1.12},
+                        {"palabra": "hija", "ctx": -15.0, "kbd": -0.62, "total": -1.25},
+                        {"palabra": "home", "ctx": -15.0, "kbd": -0.66, "total": -1.31},
+                    ],
+                },
+                {
+                    "index": 1,
+                    "input_original": "todos",
+                    "ganador": "todos",
+                    "ranking": [
+                        {
+                            "palabra": "todos",
+                            "ctx": -12.66,
+                            "kbd": 0.0,
+                            "total": -13.91,
+                        },
+                        {
+                            "palabra": "tiene",
+                            "ctx": -11.93,
+                            "kbd": -1.22,
+                            "total": -14.96,
+                        },
+                        {
+                            "palabra": "toros",
+                            "ctx": -15.0,
+                            "kbd": -0.16,
+                            "total": -15.31,
+                        },
+                        {
+                            "palabra": "tiros",
+                            "ctx": -15.0,
+                            "kbd": -0.28,
+                            "total": -15.56,
+                        },
+                        {
+                            "palabra": "torpe",
+                            "ctx": -15.0,
+                            "kbd": -0.44,
+                            "total": -15.88,
+                        },
+                    ],
+                },
+            ],
         }
         self.historial = []
 
@@ -59,7 +99,7 @@ class MainWindow(QMainWindow):
         consola.setFont(QFont("Consolas", 11))
 
         ## Original
-        originallabel = QPlainTextEdit(self.results["audit_data"]["input_original"])
+        originallabel = QPlainTextEdit(self.results["original_text"])
         originallabel.setReadOnly(True)
 
         ## Corregido
@@ -88,10 +128,13 @@ class MainWindow(QMainWindow):
 
             # Enviar texto a modelo de lenguaje
             # Aca falta tomar el dato dado por el modelo y pasarlo a objeto Resultado
-
-            self.results["audit_data"]["input_original"] = texto
+            self.results = decoder.solve(texto)
+            self.results["original_text"] = texto
             resultado = Resultado(
-                self.results["corrected_text"], 156, self.results["audit_data"]
+                self.results["corrected_text"],
+                self.results["original_text"],
+                self.results["best_score"],
+                self.results["audit_data"],
             )
 
             actualizar_resultados(resultado)
@@ -123,8 +166,6 @@ class MainWindow(QMainWindow):
             item.setSizeHint(ficharesultado.sizeHint())
             listahistorico.addItem(item)
             listahistorico.setItemWidget(item, ficharesultado)
-            for a in self.historial:
-                print(a.id, a.original_text, a.best_score)
 
         def actualizar_interfaz(resultado):
             """Actualiza elementos de interfaz."""
@@ -136,7 +177,7 @@ class MainWindow(QMainWindow):
 
             originallabel.setPlainText(original)
             corregidolabel.setPlainText(corregido)
-            lcdpanel.display(round(score))
+            lcdpanel.display(score)
             mostrarranking(ranking)
 
         def itemclicked(item):
@@ -144,8 +185,6 @@ class MainWindow(QMainWindow):
             resultadoid = widget.text().split(" - ")[0]
             resultadoid = buscar_por_id(int(resultadoid))
             actualizar_interfaz(resultadoid)
-            if widget:
-                print("Contenido del QLabel:", widget.text())
 
         listahistorico.itemClicked.connect(itemclicked)
 
@@ -162,23 +201,14 @@ class MainWindow(QMainWindow):
                     return obj
             return None
 
-        #  "ranking": {
-        #     "palabra": "Palabra",
-        #     "ctx": "Ctx",
-        #     "kbd": "Kbd",
-        #     "total": "Total",
-        # },
         def mostrarranking(ranking):
             texto = ""
-            for pos in ranking:
-                texto = (
-                    texto
-                    + f"Palabra: {pos['palabra']} - Ctx: {pos['ctx']} - Kbd: {pos['kbd']} - Total: {pos['total']} \n"
-                )
+            for a in ranking:
+                texto += f"{a['palabra']} - {a['ctx']} - {a['kbd']} - {a['total']}\n"
             consola.setPlainText(texto)
             return texto
 
-        consola.setPlainText(mostrarranking(self.results["audit_data"]["ranking"]))
+        consola.setPlainText(mostrarranking(self.results["audit_data"][0]["ranking"]))
 
         # Layouts
         ## Form
@@ -207,28 +237,6 @@ class MainWindow(QMainWindow):
         layout.addLayout(col1, stretch=1)
         layout.addLayout(col2, stretch=1)
 
-        # app.setStyleSheet("""
-        #     QWidget {
-        #         background-color: #2b2b2b;
-        #         color: #f0f0f0;
-        #         font-family: Consolas, Courier, monospace;
-        #         font-size: 12px;
-        #     }
-        #     QPushButton {
-        #         background-color: #3c3f41;
-        #         border: 1px solid #5c5c5c;
-        #         padding: 5px;
-        #     }
-        #     QPushButton:hover {
-        #         background-color: #505354;
-        #     }
-        #     QLineEdit, QPlainTextEdit, QTextEdit {
-        #         background-color: #353535;
-        #         color: #f0f0f0;
-        #         border: 1px solid #5c5c5c;
-        #     }
-        # """)
-
         # Main Config
         widget = QWidget()
         widget.setLayout(layout)
@@ -242,26 +250,37 @@ class Resultado:
     # Variable de clase (compartida entre todas las instancias)
     _id_counter = 1
 
-    def __init__(self, corrected_text, best_score, audit_data):
+    def __init__(self, corrected_text, original_text, best_score, audit_data):
         self.id = Resultado._id_counter  # asigna el ID actual
         Resultado._id_counter += 1  # aumenta para la próxima instancia
 
         self.corrected_text = corrected_text
+        self.original_text = original_text
         self.best_score = best_score
-        self.original_text = audit_data["input_original"]
-        self.ganador = audit_data["ganador"]
-        self.ranking = audit_data["ranking"]
+        self.original_text = original_text
+        self.ranking = []
+        if isinstance(audit_data, list):
+            for a in audit_data:
+                self.ranking.append(a["ranking"])
+                print('Pasos')
+        else:
+            self.ranking= audit_data["ranking"]
 
-
-# 1. Inicializar modelos (esto es lo “pesado” una sola vez)
-
-# vocab = top_n_list("es", 20000)
-# km = KeyboardModel(vocab)
-# lm = LanguageModel()  # usa data/P_matrix_transicion.json
-# decoder = ViterbiDecoder(language_model=lm, keyboard_model=km)
+        print(f"Result ID: {self.id}")
+        print(f"Texto corregido: {self.corrected_text}")
+        print(f"Texto original: {self.original_text}")
+        print(f"Score: {self.best_score}")
+        print(f"Ranking: {self.ranking}")
 
 # QT INIT
 app = QApplication(sys.argv)
 window = MainWindow()
 window.show()
 app.exec()
+# 1. Inicializar modelo
+vocab = top_n_list("es", 20000)
+km = KeyboardModel(vocab)
+lm = LanguageModel()  # usa data/P_matrix_transicion.json
+
+decoder = ViterbiDecoder(language_model=lm, keyboard_model=km)
+
