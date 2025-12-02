@@ -1,6 +1,7 @@
 import sys
 
-from PyQt5.QtCore import QSize
+from PyQt5.QtCore import QSize, Qt
+from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import *
 from wordfreq import top_n_list
 
@@ -19,17 +20,19 @@ class MainWindow(QMainWindow):
 
         # Variables
         self.results = {
-            "corrected_text": "hola",
-            "best_score": 100,
+            "corrected_text": "",
+            "best_score": 9999,
             "audit_data": {
-                "input_original": "iOriginal",
-                "ganador": "Ganador",
-                "ranking": {
-                    "palabra": "Palabra",
-                    "ctx": "Ctx",
-                    "kbd": "Kbd",
-                    "total": "Total",
-                },
+                "input_original": "",
+                "ganador": "",
+                "ranking": [
+                    {
+                        "palabra": "",
+                        "ctx": "",
+                        "kbd": "",
+                        "total": "",
+                    }
+                ],
             },
         }
         self.historial = []
@@ -44,6 +47,26 @@ class MainWindow(QMainWindow):
 
         ## Hitorial
         listahistorico = QListWidget()
+
+        ## LCD Panel
+        lcdpanel = QLCDNumber()
+        lcdpanel.setDigitCount(10)
+        lcdpanel.display(round(9999, 2))
+
+        ## Salida tipo consola
+        consola = QPlainTextEdit("Null")
+        consola.setReadOnly(True)
+        consola.setFont(QFont("Consolas", 11))
+
+        ## Original
+        originallabel = QPlainTextEdit(self.results["audit_data"]["input_original"])
+        originallabel.setReadOnly(True)
+
+        ## Corregido
+        corregidolabel = QPlainTextEdit(self.results["corrected_text"])
+        corregidolabel.setReadOnly(True)
+
+        # Ventana
 
         # Acciones de obje1tos
         ## Hace lo mismo que el click al presionar enter
@@ -65,12 +88,15 @@ class MainWindow(QMainWindow):
 
             # Enviar texto a modelo de lenguaje
             # Aca falta tomar el dato dado por el modelo y pasarlo a objeto Resultado
-            resultado = Resultado(texto, 156, {})
-            print(texto)
+
+            self.results["audit_data"]["input_original"] = texto
+            resultado = Resultado(
+                self.results["corrected_text"], 156, self.results["audit_data"]
+            )
+
             actualizar_resultados(resultado)
             actualizar_interfaz(resultado)
             limpiarentrada()
-            print(self.historial)
 
         def limpiarentrada():
             """Limpia la entrada de texto."""
@@ -79,39 +105,80 @@ class MainWindow(QMainWindow):
         def actualizar_resultados(resultado):
             """Actualiza elementos de interfaz."""
             self.historial.append(resultado)
-            print("Actualizar Resultados")
-
-        def actualizar_interfaz(resultado):
-            """Actualiza elementos de interfaz."""
             ficharesultado = QLabel()
-            ficharesultado.setText(f"{resultado.id} - {resultado.corrected_text} - {resultado.best_score}")
-
+            temp = (
+                resultado.original_text[:20]
+                if len(resultado.original_text) > 20
+                else resultado.original_text
+            )
+            temp2 = (
+                resultado.corrected_text[:20]
+                if len(resultado.corrected_text) > 20
+                else resultado.corrected_text
+            )
+            ficharesultado.setText(
+                f"{resultado.id} - {temp} - {temp2} - {resultado.best_score}"
+            )
             item = QListWidgetItem()
             item.setSizeHint(ficharesultado.sizeHint())
             listahistorico.addItem(item)
             listahistorico.setItemWidget(item, ficharesultado)
-            print("Actualizar Interfaz")
+            for a in self.historial:
+                print(a.id, a.original_text, a.best_score)
+
+        def actualizar_interfaz(resultado):
+            """Actualiza elementos de interfaz."""
+
+            original = resultado.original_text
+            corregido = resultado.corrected_text
+            score = resultado.best_score
+            ranking = resultado.ranking
+
+            originallabel.setPlainText(original)
+            corregidolabel.setPlainText(corregido)
+            lcdpanel.display(round(score))
+            mostrarranking(ranking)
 
         def itemclicked(item):
-            print("Item clickeado!")
             widget = listahistorico.itemWidget(item)
-
+            resultadoid = widget.text().split(" - ")[0]
+            resultadoid = buscar_por_id(int(resultadoid))
+            actualizar_interfaz(resultadoid)
             if widget:
                 print("Contenido del QLabel:", widget.text())
+
         listahistorico.itemClicked.connect(itemclicked)
 
-        def buscar_por_id(lista_objetos, id_buscado):
+        def buscar_por_id(id_buscado):
             """
-            Busca un objeto en una lista por su id.
+            Busca un resultado por su id.
 
             :param lista_objetos: lista de objetos que tienen un atributo 'id'
             :param id_buscado: id que se quiere buscar
             :return: el objeto que coincide o None si no se encuentra
             """
-            for obj in lista_objetos:
+            for obj in self.historial:
                 if obj.id == id_buscado:
                     return obj
             return None
+
+        #  "ranking": {
+        #     "palabra": "Palabra",
+        #     "ctx": "Ctx",
+        #     "kbd": "Kbd",
+        #     "total": "Total",
+        # },
+        def mostrarranking(ranking):
+            texto = ""
+            for pos in ranking:
+                texto = (
+                    texto
+                    + f"Palabra: {pos['palabra']} - Ctx: {pos['ctx']} - Kbd: {pos['kbd']} - Total: {pos['total']} \n"
+                )
+            consola.setPlainText(texto)
+            return texto
+
+        consola.setPlainText(mostrarranking(self.results["audit_data"]["ranking"]))
 
         # Layouts
         ## Form
@@ -126,14 +193,41 @@ class MainWindow(QMainWindow):
 
         ## Columna 2
         col2 = QVBoxLayout()
-        col2.addWidget(QLCDNumber(), stretch=1)
-        col2.addWidget(QLabel("Ranking"), stretch=6)
-        col2.addWidget(QLabel("Hello"), stretch=2)
+        col2.addWidget(QLabel("Score"))
+        col2.addWidget(lcdpanel, stretch=1)
+        col2.addWidget(QLabel("Ranking"))
+        col2.addWidget(consola, stretch=6)
+        col2.addWidget(QLabel("Texto Original"))
+        col2.addWidget(originallabel, stretch=1)
+        col2.addWidget(QLabel("Texto Corregido"))
+        col2.addWidget(corregidolabel, stretch=1)
 
         ## Main Layout
         layout = QHBoxLayout()
         layout.addLayout(col1, stretch=1)
         layout.addLayout(col2, stretch=1)
+
+        # app.setStyleSheet("""
+        #     QWidget {
+        #         background-color: #2b2b2b;
+        #         color: #f0f0f0;
+        #         font-family: Consolas, Courier, monospace;
+        #         font-size: 12px;
+        #     }
+        #     QPushButton {
+        #         background-color: #3c3f41;
+        #         border: 1px solid #5c5c5c;
+        #         padding: 5px;
+        #     }
+        #     QPushButton:hover {
+        #         background-color: #505354;
+        #     }
+        #     QLineEdit, QPlainTextEdit, QTextEdit {
+        #         background-color: #353535;
+        #         color: #f0f0f0;
+        #         border: 1px solid #5c5c5c;
+        #     }
+        # """)
 
         # Main Config
         widget = QWidget()
@@ -143,17 +237,21 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Smart KeyBoard")
         self.setFixedSize(QSize(800, 600))
 
+
 class Resultado:
     # Variable de clase (compartida entre todas las instancias)
     _id_counter = 1
 
     def __init__(self, corrected_text, best_score, audit_data):
-        self.id = Resultado._id_counter   # asigna el ID actual
-        Resultado._id_counter += 1        # aumenta para la próxima instancia
+        self.id = Resultado._id_counter  # asigna el ID actual
+        Resultado._id_counter += 1  # aumenta para la próxima instancia
 
         self.corrected_text = corrected_text
         self.best_score = best_score
-        self.audit_data = audit_data
+        self.original_text = audit_data["input_original"]
+        self.ganador = audit_data["ganador"]
+        self.ranking = audit_data["ranking"]
+
 
 # 1. Inicializar modelos (esto es lo “pesado” una sola vez)
 
