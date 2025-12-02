@@ -33,18 +33,41 @@ def main():
         print("Score:     ", result["best_score"])
 
         audit = result["audit_data"]
-        print("\nAuditoría (última palabra):")
-        print("  Input original:", audit["input_original"])
-        print("  Ganador:       ", audit["ganador"])
-        print("  Ranking top 5:")
-        for item in audit["ranking"]:
-            print(
-                f"    {item['palabra']:>12} | "
-                f"ctx={item['ctx']:.2f} | "
-                f"kbd={item['kbd']:.2f} | "
-                f"total={item['total']:.2f}",
-            )
-        print("\n")
+
+        # Compatibilidad: `audit` puede ser un dict (caso single-word)
+        # o una lista con una entrada por palabra (nuevo comportamiento).
+        if isinstance(audit, list):
+            print("\nAuditoría (por palabra):")
+            for entry in audit:
+                idx = entry.get("index")
+                inp = entry.get("input_original", "")
+                winner = entry.get("ganador", "")
+
+                header = f" Palabra {idx}: input='{inp}' ganador='{winner}'"
+                print(header)
+                print("  Ranking top 5:")
+                for item in entry.get("ranking", []):
+                    print(
+                        f"    {item.get('palabra',''):>12} | "
+                        f"ctx={item.get('ctx',0.0):.2f} | "
+                        f"kbd={item.get('kbd',0.0):.2f} | "
+                        f"total={item.get('total',0.0):.2f}",
+                    )
+                print()
+        else:
+            # Forma antigua (dict con un solo resumen)
+            print("\nAuditoría (última palabra):")
+            print("  Input original:", audit.get("input_original"))
+            print("  Ganador:       ", audit.get("ganador"))
+            print("  Ranking top 5:")
+            for item in audit.get("ranking", []):
+                print(
+                    f"    {item.get('palabra',''):>12} | "
+                    f"ctx={item.get('ctx',0.0):.2f} | "
+                    f"kbd={item.get('kbd',0.0):.2f} | "
+                    f"total={item.get('total',0.0):.2f}",
+                )
+            print("\n")
 
 
 if __name__ == "__main__":
