@@ -5,10 +5,10 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import *
 from wordfreq import top_n_list
 
-from .GUI.layout_colorwidget import Color
-from .keyboard_model import KeyboardModel
-from .language_model import LanguageModel
-from .viterbi_decoder import ViterbiDecoder
+from hmm_smart_keyboard.GUI.layout_colorwidget import Color
+from hmm_smart_keyboard.keyboard_model import KeyboardModel
+from hmm_smart_keyboard.language_model import LanguageModel
+from hmm_smart_keyboard.viterbi_decoder import ViterbiDecoder
 
 
 class MainWindow(QMainWindow):

@@ -1,8 +1,8 @@
 from wordfreq import top_n_list
 
-from .keyboard_model import KeyboardModel
-from .language_model import LanguageModel
-from .viterbi_decoder import ViterbiDecoder
+from hmm_smart_keyboard.keyboard_model import KeyboardModel
+from hmm_smart_keyboard.language_model import LanguageModel
+from hmm_smart_keyboard.viterbi_decoder import ViterbiDecoder
 
 
 def main():
