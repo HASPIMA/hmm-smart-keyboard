@@ -3,7 +3,7 @@
 >[!NOTE] 
 >¿Que es HMM Smart Keyboard?
 >
->HMM Smart Keyboard es una herramienta que permite corregir errores en textos mediante la utilización de un modelo de Markov Hidden Markov.
+>HMM Smart Keyboard es una herramienta que permite corregir errores en textos (Como por ejemplo, al escribir con un teclado tactil) mediante la utilización de un modelo de Markov Hidden Markov.
 
 ## Contenido
 - [Marco Teórico](#Marco-Teorico)
@@ -16,19 +16,46 @@
 
 ## Marco Teórico
 
-  
+Modelado (Capítulo 14):
+Estados Ocultos ($X_t$): La letra real que el usuario quería escribir.
+
+Evidencia ($E_t$): La letra (o coordenada de pantalla) que el sistema detectó.
+
+Modelo: HMM donde las transiciones representan la estructura del lenguaje (probabilidad de que 'u' siga a 'q').
 
 ## Descripción y justificación del problema
 
+> [!IMPORTANT]
+> Problema:
+> 
+> Dada una secuencia de teclas presionadas (que pueden ser erróneas debido a "dedos gordos" o ruido en la pantalla táctil), determinar la palabra correcta que el usuario intentó escribir.
   
 
 ## Diseño de la aplicación
 
-  
+### Herramientas:
+Se realiza con [Python](https://www.python.org) y UV de [astral.sh](https://docs.astral.sh/uv) esto por la facilidad de desarrollo en el lenguaje y el entorno adecuado que ofrece UV.
+
+Para la interfaz gráfica se utiliza [PyQt5](https://www.riverbankcomputing.com/software/pyqt/intro), cumpliendo asi uno de los requisitos del proyecto de mantener el todos sus componentes en un mismo lenguaje y entorno base.
+
+### Arquitectura
+Se utiliza una arquitectura monolitica. Al tratarse de un proyecto sencillo no se considera necesario realizar una distincion fuerte entre componentes de la interfaz grafica y logica de negocio, aun asi se separan las librerias de logica en la carpeta `utils`, `GUI` contiene las librerias de la interfaz grafica y `data` los archivos necesarios para el funcionamiento de la aplicacion.
+
+### Implementación
+
+**Matriz de Transición:** Basada en la frecuencia de bigramas del idioma (ej. en español, después de una 'q' es casi 100% seguro que viene una 'u').
+
+**Matriz del Sensor:** Basada en la distribución del teclado QWERTY (si el usuario quería tocar 'S', es probable que toque 'A', 'W', 'D', 'Z' o 'X' por error).
+
+**Algoritmo clave a implementar:** *Algoritmo de Viterbi*. Encuentra la "Most Likely Explanation" (Secuencia de letras reales) dada la secuencia de teclas sucias observadas.
+
+**Algoritmo secundario:** *Predicción*. Calcular $P(X{t+1} | e{1:t})$ para sugerir cuál será la siguiente letra que el usuario va a escribir.
 
 ## Código fuente
 
-  
+Se puede ver el codigo fuente el las carpetas `src/hmm_smart_keyboard` del [repositorio](https://github.com/HASPIMA/hmm-smart-keyboard).
+
+El funcionamiento y la explicacion de este esta en el [apartado tecnico](#manual-técnico)
 
 ## Manual de usuario
 
@@ -100,7 +127,6 @@ Al dar `enter` se envia al modelo de lenguaje y se muestran los mismos resultado
 Para salir se puede presionar `Ctrl+C` o `Ctrl+D` en la consola o escribir `salir` en la consola.
 
 ## Manual técnico
-
 
 
 
