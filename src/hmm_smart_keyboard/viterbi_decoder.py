@@ -14,7 +14,7 @@ class ViterbiDecoder:
         # Hiperparámetro: Balance entre contexto y teclado
         # Si alpha=1.0, ambos pesan igual
         # Si alpha=2.0, el contexto pesa el doble
-        self.alpha = 1.0  # Peso del Language Model
+        self.alpha = 0.5  # Peso del Language Model
         self.beta = 2.0   # Peso del Keyboard Model
 
     def solve(self, sentence_dirty):

@@ -22,58 +22,8 @@ class MainWindow(QMainWindow):
         self.results = {
             "corrected_text": "",
             "original_text": "",
-            "best_score": 9999,
-            "audit_data": [
-                {
-                    "index": 0,
-                    "input_original": "hola",
-                    "ganador": "hija",
-                    "ranking": [
-                        {"palabra": "hola", "ctx": -15.0, "kbd": 0.0, "total": 0.0},
-                        {"palabra": "hoja", "ctx": -15.0, "kbd": -0.5, "total": -1.0},
-                        {"palabra": "hope", "ctx": -15.0, "kbd": -0.56, "total": -1.12},
-                        {"palabra": "hija", "ctx": -15.0, "kbd": -0.62, "total": -1.25},
-                        {"palabra": "home", "ctx": -15.0, "kbd": -0.66, "total": -1.31},
-                    ],
-                },
-                {
-                    "index": 1,
-                    "input_original": "todos",
-                    "ganador": "todos",
-                    "ranking": [
-                        {
-                            "palabra": "todos",
-                            "ctx": -12.66,
-                            "kbd": 0.0,
-                            "total": -13.91,
-                        },
-                        {
-                            "palabra": "tiene",
-                            "ctx": -11.93,
-                            "kbd": -1.22,
-                            "total": -14.96,
-                        },
-                        {
-                            "palabra": "toros",
-                            "ctx": -15.0,
-                            "kbd": -0.16,
-                            "total": -15.31,
-                        },
-                        {
-                            "palabra": "tiros",
-                            "ctx": -15.0,
-                            "kbd": -0.28,
-                            "total": -15.56,
-                        },
-                        {
-                            "palabra": "torpe",
-                            "ctx": -15.0,
-                            "kbd": -0.44,
-                            "total": -15.88,
-                        },
-                    ],
-                },
-            ],
+            "best_score": 00000,
+            "audit_data": [],
         }
         self.historial = []
 
@@ -160,7 +110,7 @@ class MainWindow(QMainWindow):
                 else resultado.corrected_text
             )
             ficharesultado.setText(
-                f"{resultado.id} - {temp} - {temp2} - {resultado.best_score}"
+                f"{resultado.id} - {temp} - {temp2} - {round(resultado.best_score,3)}"
             )
             item = QListWidgetItem()
             item.setSizeHint(ficharesultado.sizeHint())
@@ -177,7 +127,7 @@ class MainWindow(QMainWindow):
 
             originallabel.setPlainText(original)
             corregidolabel.setPlainText(corregido)
-            lcdpanel.display(score)
+            lcdpanel.display(round(score,3))
             mostrarranking(ranking)
 
         def itemclicked(item):
@@ -203,12 +153,14 @@ class MainWindow(QMainWindow):
 
         def mostrarranking(ranking):
             texto = ""
-            for a in ranking:
-                texto += f"{a['palabra']} - {a['ctx']} - {a['kbd']} - {a['total']}\n"
+            for item in ranking:
+                for a in item:
+                    texto += f"{a['palabra']} CTX:{round(a['ctx'],3)} KBD:{round(a['kbd'],3)} TOTAL:{a['total']}\n"
+                texto += "\n\n"
             consola.setPlainText(texto)
             return texto
 
-        consola.setPlainText(mostrarranking(self.results["audit_data"][0]["ranking"]))
+        consola.setPlainText(mostrarranking(self.results["audit_data"]))
 
         # Layouts
         ## Form
@@ -262,25 +214,19 @@ class Resultado:
         if isinstance(audit_data, list):
             for a in audit_data:
                 self.ranking.append(a["ranking"])
-                print('Pasos')
         else:
-            self.ranking= audit_data["ranking"]
+            self.ranking.append(audit_data["ranking"])
 
-        print(f"Result ID: {self.id}")
-        print(f"Texto corregido: {self.corrected_text}")
-        print(f"Texto original: {self.original_text}")
-        print(f"Score: {self.best_score}")
-        print(f"Ranking: {self.ranking}")
-
-# QT INIT
-app = QApplication(sys.argv)
-window = MainWindow()
-window.show()
-app.exec()
 # 1. Inicializar modelo
 vocab = top_n_list("es", 20000)
 km = KeyboardModel(vocab)
 lm = LanguageModel()  # usa data/P_matrix_transicion.json
 
 decoder = ViterbiDecoder(language_model=lm, keyboard_model=km)
+
+# QT INIT
+app = QApplication(sys.argv)
+window = MainWindow()
+window.show()
+app.exec()
 
